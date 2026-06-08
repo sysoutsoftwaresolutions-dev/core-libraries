@@ -1,0 +1,17 @@
+{
+  "id": "linear-workflow",
+  "version": "1.0.0",
+  "type": "REGULAR",
+  "startStep": "step-one",
+  "steps": [
+    {
+      "id": "step-one",
+      "resource": "addNumberExecutor",
+      "nextStep": "step-two"
+    },
+    {
+      "id": "step-two",
+      "resource": "decisionExecutor"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+com\core\workflow\controller\WorkflowRestController.class
+com\core\workflow\controller\WorkflowGraphQLController.class
+com\core\workflow\controller\WorkflowGraphQLController$VariableInput.class
+com\core\workflow\config\WorkflowRestAutoConfiguration.class
+com\core\workflow\controller\WorkflowGraphQLController$ExecutionResult.class
+com\core\workflow\controller\WorkflowGraphQLController$Variable.class
+com\core\workflow\kafka\WorkflowKafkaConsumer.class
+com\core\workflow\kafka\WorkflowKafkaConsumer$WorkflowTriggerRequest.class

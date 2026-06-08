@@ -1,0 +1,5 @@
+com\core\workflow\controller\MultiTenancyVerificationTest.class
+com\core\workflow\client\TestDownstreamController.class
+com\core\workflow\client\WebClientIntegrationTest.class
+com\core\workflow\TestApplication.class
+com\core\workflow\controller\WorkflowRestIntegrationTest.class

@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.core.workflow.controller.WorkflowRestIntegrationTest
+-------------------------------------------------------------------------------
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.443 s -- in com.core.workflow.controller.WorkflowRestIntegrationTest
