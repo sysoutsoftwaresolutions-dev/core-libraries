@@ -1,7 +1,0 @@
-com\core\workflow\mock\MockStepExecutors.class
-com\core\workflow\mock\MockStepExecutors$StepWithOverrideExecutor.class
-com\core\workflow\engine\StateMachineEngineTest.class
-com\core\workflow\mock\MockStepExecutors$AddNumberExecutor.class
-com\core\workflow\mock\MockStepExecutors$DecisionExecutor.class
-com\core\workflow\mock\MockStepExecutors$FailingStepExecutor.class
-com\core\workflow\TestApplication.class
