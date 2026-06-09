@@ -9,11 +9,9 @@ import com.core.workflow.persistence.InMemoryStateRepository;
 import com.core.workflow.persistence.MongoStateMachineStateRepository;
 import com.core.workflow.persistence.StateMachineStateRepository;
 import com.core.workflow.security.WorkflowSecurityService;
-import com.core.workflow.database.TenantDatabaseResolver;
-import com.core.workflow.database.TenantConnectionProvider;
-import com.core.workflow.database.TenantRoutingMongoDatabaseFactory;
 import com.core.workflow.aspect.TenantModuleValidationAspect;
 import com.core.workflow.registry.TenantModuleRegistry;
+import com.core.workflow.registry.WorkflowRegistry;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -33,38 +31,12 @@ import java.util.List;
         WorkflowSecurityService.class,
         StateMachineParser.class,
         TenantModuleRegistry.class,
-        TenantModuleValidationAspect.class
+        TenantModuleValidationAspect.class,
+        WorkflowRegistry.class
 })
 public class StateMachineAutoConfiguration {
 
-    @Bean
-    @ConditionalOnMissingBean(TenantDatabaseResolver.class)
-    public TenantDatabaseResolver tenantDatabaseResolver() {
-        // Default resolver: creates database named workflow_db_<tenantId>
-        return tenantId -> "workflow_db_" + tenantId.toLowerCase();
-    }
 
-    @Bean
-    @ConditionalOnMissingBean(org.springframework.data.mongodb.MongoDatabaseFactory.class)
-    @org.springframework.boot.autoconfigure.condition.ConditionalOnBean(com.mongodb.client.MongoClient.class)
-    public org.springframework.data.mongodb.MongoDatabaseFactory mongoDatabaseFactory(
-            com.mongodb.client.MongoClient mongoClient,
-            org.springframework.boot.autoconfigure.mongo.MongoProperties properties,
-            TenantDatabaseResolver databaseResolver) {
-        String dbName = properties.getMongoClientDatabase();
-        if (dbName == null || dbName.isBlank()) {
-            dbName = "workflow_db";
-        }
-        return new com.core.workflow.database.TenantRoutingMongoDatabaseFactory(mongoClient, dbName, databaseResolver);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(com.core.workflow.database.TenantConnectionProvider.class)
-    @org.springframework.boot.autoconfigure.condition.ConditionalOnBean(org.springframework.data.mongodb.MongoDatabaseFactory.class)
-    public com.core.workflow.database.TenantConnectionProvider tenantConnectionProvider(
-            org.springframework.data.mongodb.MongoDatabaseFactory databaseFactory) {
-        return tenantId -> databaseFactory;
-    }
 
     /**
      * Resolves the StateMachineStateRepository. If MongoTemplate is present and configured in the

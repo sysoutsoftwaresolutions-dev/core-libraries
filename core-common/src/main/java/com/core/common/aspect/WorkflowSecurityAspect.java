@@ -73,8 +73,14 @@ public class WorkflowSecurityAspect {
                 String tokenTenant = jwtTokenParser.getTenant(claims);
                 String currentTenant = TenantContext.getCurrentTenant();
                 if (currentTenant != null && tokenTenant != null && !currentTenant.equalsIgnoreCase(tokenTenant)) {
-                    log.error("[SecurityAspect] Tenant mismatch. TenantContext: {}, Token: {}", currentTenant, tokenTenant);
-                    throw new CoreException("Tenant access mismatch: request header and token do not align.", "SECURITY_UNAUTHORIZED");
+                    List<String> tokenRoles = jwtTokenParser.getRoles(claims);
+                    boolean isPlatformSuperAdmin = ("platform".equalsIgnoreCase(tokenTenant) || "system".equalsIgnoreCase(tokenTenant))
+                            && tokenRoles.stream().anyMatch(r -> r.equalsIgnoreCase("SUPER_ADMIN") || r.equalsIgnoreCase("ROLE_SUPER_ADMIN"));
+                    
+                    if (!isPlatformSuperAdmin) {
+                        log.error("[SecurityAspect] Tenant mismatch. TenantContext: {}, Token: {}", currentTenant, tokenTenant);
+                        throw new CoreException("Tenant access mismatch: request header and token do not align.", "SECURITY_UNAUTHORIZED");
+                    }
                 }
 
                 // If TenantContext was not set but token has a tenant, set it.
@@ -177,8 +183,8 @@ public class WorkflowSecurityAspect {
             }
             return false;
         } catch (ClassNotFoundException e) {
-            log.warn("Spring Security is not present on the classpath. Aspect security checks are permissive.");
-            return true;
+            log.warn("Spring Security is not present on the classpath. Aspect security checks are secure (fail-closed).");
+            return false;
         } catch (Exception e) {
             log.error("Error evaluating Spring Security roles in Aspect", e);
             return false;

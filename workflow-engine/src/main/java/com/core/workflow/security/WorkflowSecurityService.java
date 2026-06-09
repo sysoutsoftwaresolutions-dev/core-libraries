@@ -72,11 +72,8 @@ public class WorkflowSecurityService {
             }
             return false;
         } catch (ClassNotFoundException e) {
-            // Spring Security is not on the classpath. For our core library standalone implementation,
-            // we will log a warning and fallback to permissive mode.
-            log.warn("Spring Security is not present on the classpath. Allowing execution by default. " +
-                     "To enforce role checking, ensure spring-security dependencies are active.");
-            return true; 
+            log.warn("Spring Security is not present on the classpath. Aspect security checks are secure (fail-closed).");
+            return false; 
         } catch (Exception e) {
             log.error("Error evaluating Spring Security roles", e);
             return false;

@@ -1,4 +1,4 @@
-package com.core.workflow.database;
+package com.core.common.database;
 
 import com.core.common.context.TenantContext;
 import com.mongodb.client.MongoClient;
@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
 /**
  * Dynamic routing implementation of {@link org.springframework.data.mongodb.MongoDatabaseFactory}
  * that switches databases based on the current ThreadLocal {@link TenantContext}.
+ * Shared across all microservices.
  */
 public class TenantRoutingMongoDatabaseFactory extends SimpleMongoClientDatabaseFactory {
 

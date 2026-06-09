@@ -1,10 +1,11 @@
-package com.core.workflow.database;
+package com.core.common.database;
 
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 
 /**
  * Interface that provides dynamic lookup or creation of MongoDatabaseFactory
  * instances for tenant database routing.
+ * Shared across all microservices.
  */
 public interface TenantConnectionProvider {
 

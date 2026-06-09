@@ -31,12 +31,17 @@ import java.util.concurrent.TimeUnit;
  * Spring Boot auto-configuration for core-common utilities, automatically registering
  * the global exception handler, AOP aspects, and WebClient downstream helper.
  */
-@AutoConfiguration
+@AutoConfiguration(
+        after = { org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration.class },
+        before = { org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration.class }
+)
 @ConditionalOnClass(name = "org.springframework.web.bind.annotation.RestControllerAdvice")
 @Import({
         WorkflowSecurityAspect.class,
         ControllerErrorHandlerAspect.class,
-        JwtTokenParser.class
+        JwtTokenParser.class,
+        com.core.common.event.OutboxPublisher.class,
+        com.core.common.event.OutboxScheduler.class
 })
 public class CoreCommonAutoConfiguration {
 
@@ -99,5 +104,70 @@ public class CoreCommonAutoConfiguration {
         public void addInterceptors(InterceptorRegistry registry) {
             registry.addInterceptor(tenantWebInterceptor());
         }
+    }
+
+    /**
+     * MongoDB event processing guard configuration, conditionally active only when MongoTemplate is available.
+     */
+    @Bean
+    @org.springframework.boot.autoconfigure.condition.ConditionalOnClass(org.springframework.data.mongodb.core.MongoTemplate.class)
+    @ConditionalOnMissingBean
+    public com.core.common.event.EventProcessingGuard eventProcessingGuard(org.springframework.data.mongodb.core.MongoTemplate mongoTemplate) {
+        return new com.core.common.event.EventProcessingGuard(mongoTemplate);
+    }
+
+    @Bean
+    @org.springframework.boot.autoconfigure.condition.ConditionalOnBean(org.springframework.data.mongodb.MongoDatabaseFactory.class)
+    @ConditionalOnMissingBean(org.springframework.transaction.PlatformTransactionManager.class)
+    public org.springframework.data.mongodb.MongoTransactionManager transactionManager(org.springframework.data.mongodb.MongoDatabaseFactory dbFactory) {
+        return new org.springframework.data.mongodb.MongoTransactionManager(dbFactory);
+    }
+
+    /**
+     * Tenant database resolver configuration, resolving premium database names as tenant_<tenantId>
+     * and routing standard tenants to the default shared database.
+     */
+    @Bean
+    @ConditionalOnMissingBean(com.core.common.database.TenantDatabaseResolver.class)
+    public com.core.common.database.TenantDatabaseResolver tenantDatabaseResolver() {
+        return tenantId -> {
+            if (tenantId == null || tenantId.isBlank() || "default".equalsIgnoreCase(tenantId) || "shared".equalsIgnoreCase(tenantId)) {
+                return "shared_educational_erp";
+            }
+            // Switched dynamically on thread boundaries to dedicated databases named tenant_<tenantId>
+            if (tenantId.toLowerCase().contains("premium")) {
+                return "tenant_" + tenantId.toLowerCase();
+            }
+            return "shared_educational_erp";
+        };
+    }
+
+    /**
+     * Custom MongoDatabaseFactory to dynamically route database operations to standard or premium databases
+     * depending on the tenant context.
+     */
+    @Bean
+    @ConditionalOnMissingBean(org.springframework.data.mongodb.MongoDatabaseFactory.class)
+    @org.springframework.boot.autoconfigure.condition.ConditionalOnBean(com.mongodb.client.MongoClient.class)
+    public org.springframework.data.mongodb.MongoDatabaseFactory mongoDatabaseFactory(
+            com.mongodb.client.MongoClient mongoClient,
+            org.springframework.boot.autoconfigure.mongo.MongoProperties properties,
+            com.core.common.database.TenantDatabaseResolver databaseResolver) {
+        String dbName = properties.getMongoClientDatabase();
+        if (dbName == null || dbName.isBlank()) {
+            dbName = "shared_educational_erp";
+        }
+        return new com.core.common.database.TenantRoutingMongoDatabaseFactory(mongoClient, dbName, databaseResolver);
+    }
+
+    /**
+     * Connection provider for backward compatibility and tenant factory resolution.
+     */
+    @Bean
+    @ConditionalOnMissingBean(com.core.common.database.TenantConnectionProvider.class)
+    @org.springframework.boot.autoconfigure.condition.ConditionalOnBean(org.springframework.data.mongodb.MongoDatabaseFactory.class)
+    public com.core.common.database.TenantConnectionProvider tenantConnectionProvider(
+            org.springframework.data.mongodb.MongoDatabaseFactory databaseFactory) {
+        return tenantId -> databaseFactory;
     }
 }

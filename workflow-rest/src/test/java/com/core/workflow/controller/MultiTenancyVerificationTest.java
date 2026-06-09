@@ -2,8 +2,8 @@ package com.core.workflow.controller;
 
 import com.core.common.context.TenantContext;
 import com.core.common.security.JwtTokenParser;
-import com.core.workflow.database.TenantDatabaseResolver;
-import com.core.workflow.database.TenantRoutingMongoDatabaseFactory;
+import com.core.common.database.TenantDatabaseResolver;
+import com.core.common.database.TenantRoutingMongoDatabaseFactory;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import io.jsonwebtoken.Jwts;
@@ -24,7 +24,9 @@ import java.util.concurrent.Future;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(properties = {
+    "core.security.jwt.allow-unsigned=true"
+})
 public class MultiTenancyVerificationTest {
 
     @Autowired
@@ -42,28 +44,31 @@ public class MultiTenancyVerificationTest {
 
     @Test
     public void testDatabaseResolver() {
-        String dbName = databaseResolver.resolveDatabaseName("TenantXYZ");
-        assertEquals("workflow_db_tenantxyz", dbName);
+        String dbNameStandard = databaseResolver.resolveDatabaseName("TenantXYZ");
+        assertEquals("shared_educational_erp", dbNameStandard);
+
+        String dbNamePremium = databaseResolver.resolveDatabaseName("TenantXYZPremium");
+        assertEquals("tenant_tenantxyzpremium", dbNamePremium);
     }
 
     @Test
     public void testRoutingMongoDatabaseFactory() {
         MongoDatabase mockDb = Mockito.mock(MongoDatabase.class);
-        Mockito.when(mongoClient.getDatabase("workflow_db_tenantxyz")).thenReturn(mockDb);
+        Mockito.when(mongoClient.getDatabase("tenant_tenantxyzpremium")).thenReturn(mockDb);
 
         TenantRoutingMongoDatabaseFactory factory = new TenantRoutingMongoDatabaseFactory(
-                mongoClient, "workflow_db", databaseResolver
+                mongoClient, "shared_educational_erp", databaseResolver
         );
 
         // 1. Without context
         TenantContext.clear();
         factory.getMongoDatabase();
-        Mockito.verify(mongoClient, Mockito.atLeastOnce()).getDatabase("workflow_db");
+        Mockito.verify(mongoClient, Mockito.atLeastOnce()).getDatabase("shared_educational_erp");
 
         // 2. With tenant context
-        TenantContext.setCurrentTenant("TenantXYZ");
+        TenantContext.setCurrentTenant("TenantXYZPremium");
         factory.getMongoDatabase();
-        Mockito.verify(mongoClient, Mockito.atLeastOnce()).getDatabase("workflow_db_tenantxyz");
+        Mockito.verify(mongoClient, Mockito.atLeastOnce()).getDatabase("tenant_tenantxyzpremium");
         
         TenantContext.clear();
     }

@@ -1,7 +1,8 @@
-package com.core.workflow.database;
+package com.core.common.database;
 
 /**
  * Interface defining resolution logic for tenant-specific database names.
+ * Shared across all microservices for multi-tenant routing.
  */
 public interface TenantDatabaseResolver {
 
