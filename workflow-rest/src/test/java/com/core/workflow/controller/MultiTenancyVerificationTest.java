@@ -14,7 +14,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.core.task.AsyncTaskExecutor;
 
 import java.security.Key;
@@ -39,7 +39,7 @@ public class MultiTenancyVerificationTest {
     @Qualifier("tenantAwareTaskExecutor")
     private AsyncTaskExecutor tenantAwareTaskExecutor;
 
-    @MockBean
+    @MockitoBean
     private MongoClient mongoClient;
 
     @Test

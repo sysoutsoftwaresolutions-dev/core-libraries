@@ -40,12 +40,19 @@
             <artifactId>spring-kafka</artifactId>
         </dependency>
 
+        <!-- Validation Starter -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
         <!-- Testing Dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
         
         <!-- Spring GraphQL Test -->
         <dependency>

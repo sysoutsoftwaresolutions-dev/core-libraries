@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.tester.AutoConfigureGraphQlTester;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.graphql.test.tester.GraphQlTester;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -49,10 +49,10 @@ public class WorkflowRestIntegrationTest {
     @Autowired
     private WorkflowKafkaConsumer kafkaConsumer;
 
-    @MockBean
+    @MockitoBean
     private StateMachineStateRepository stateRepository;
 
-    @MockBean
+    @MockitoBean
     private WorkflowSecurityService securityService;
 
     @BeforeEach
@@ -250,12 +250,12 @@ public class WorkflowRestIntegrationTest {
                 """;
 
         // AOP Aspect WorkflowSecurityAspect should catch SecuredWorkflow on Controller, 
-        // delegate and throw CoreException which is mapped to 500 by GlobalExceptionHandler
+        // delegate and throw CoreException which is mapped to 403 Forbidden by GlobalExceptionHandler
         mockMvc.perform(post("/api/workflows/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.error").value("Core Exception"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("Forbidden"))
                 .andExpect(jsonPath("$.errorCode").value("SECURITY_UNAUTHORIZED"));
     }
 }

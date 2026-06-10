@@ -23,7 +23,7 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- Spring AOP for Aspect-Oriented Programming -->
+        <!-- Spring AspectJ for Aspect-Oriented Programming -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
@@ -82,6 +82,12 @@
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
+        </dependency>
+        <!-- Core Utilities -->
+        <dependency>
+            <groupId>com.core</groupId>
+            <artifactId>core-utils</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
@@ -42,7 +42,7 @@ public class StateMachineEngineTest {
     @Autowired
     private StateMachineStateRepository stateRepository;
 
-    @MockBean
+    @MockitoBean
     private WorkflowSecurityService mockSecurityService;
 
     // Autowire the mocked MongoTemplate from TestApplication to satisfy bean conditions

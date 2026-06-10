@@ -1,11 +1,11 @@
 package com.core.utils.json;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,14 +19,22 @@ public final class JsonUtils {
 
     private static final Logger log = LoggerFactory.getLogger(JsonUtils.class);
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-            .registerModule(new JavaTimeModule())
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-            .configure(SerializationFeature.INDENT_OUTPUT, true);
+    private static ObjectMapper objectMapper = JsonMapper.builder()
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .enable(SerializationFeature.INDENT_OUTPUT)
+            .build();
 
     private JsonUtils() {
         // Prevent instantiation
+    }
+
+    /**
+     * Sets the shared ObjectMapper instance (used by Spring Config).
+     *
+     * @param mapper ObjectMapper
+     */
+    public static synchronized void setObjectMapper(ObjectMapper mapper) {
+        objectMapper = mapper;
     }
 
     /**
@@ -35,7 +43,7 @@ public final class JsonUtils {
      * @return ObjectMapper
      */
     public static ObjectMapper getObjectMapper() {
-        return OBJECT_MAPPER;
+        return objectMapper;
     }
 
     /**
@@ -46,8 +54,8 @@ public final class JsonUtils {
      */
     public static String toJson(Object object) {
         try {
-            return OBJECT_MAPPER.writeValueAsString(object);
-        } catch (JsonProcessingException e) {
+            return objectMapper.writeValueAsString(object);
+        } catch (Exception e) {
             log.error("Failed to serialize object to JSON", e);
             throw new RuntimeException("JSON serialization error", e);
         }
@@ -63,8 +71,8 @@ public final class JsonUtils {
      */
     public static <T> T fromJson(String json, Class<T> clazz) {
         try {
-            return OBJECT_MAPPER.readValue(json, clazz);
-        } catch (JsonProcessingException e) {
+            return objectMapper.readValue(json, clazz);
+        } catch (Exception e) {
             log.error("Failed to deserialize JSON to class {}", clazz.getSimpleName(), e);
             throw new RuntimeException("JSON deserialization error", e);
         }
@@ -80,8 +88,8 @@ public final class JsonUtils {
      */
     public static <T> T fromJson(String json, TypeReference<T> typeReference) {
         try {
-            return OBJECT_MAPPER.readValue(json, typeReference);
-        } catch (JsonProcessingException e) {
+            return objectMapper.readValue(json, typeReference);
+        } catch (Exception e) {
             log.error("Failed to deserialize JSON to type reference", e);
             throw new RuntimeException("JSON deserialization error", e);
         }
@@ -97,8 +105,8 @@ public final class JsonUtils {
      */
     public static <T> T fromJson(InputStream inputStream, Class<T> clazz) {
         try {
-            return OBJECT_MAPPER.readValue(inputStream, clazz);
-        } catch (IOException e) {
+            return objectMapper.readValue(inputStream, clazz);
+        } catch (Exception e) {
             log.error("Failed to read JSON from input stream to class {}", clazz.getSimpleName(), e);
             throw new RuntimeException("JSON deserialization read error", e);
         }

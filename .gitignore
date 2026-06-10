@@ -3,3 +3,15 @@ target/
 
 # Ignore all target folders in submodules/projects
 **/target/
+
+*.class
+*.log
+*.jar
+.idea
+.project
+.classpath
+.springBeans
+
+build/
+dist/
+logs/

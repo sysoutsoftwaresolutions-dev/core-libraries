@@ -6,6 +6,7 @@ import com.core.common.client.WebClientHelper;
 import com.core.common.context.TenantAwareTaskExecutor;
 import com.core.common.context.TenantWebInterceptor;
 import com.core.common.handler.GlobalExceptionHandler;
+import com.core.common.handler.WebMvcGlobalExceptionHandler;
 import com.core.common.security.JwtTokenParser;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
@@ -41,7 +42,8 @@ import java.util.concurrent.TimeUnit;
         ControllerErrorHandlerAspect.class,
         JwtTokenParser.class,
         com.core.common.event.OutboxPublisher.class,
-        com.core.common.event.OutboxScheduler.class
+        com.core.common.event.OutboxScheduler.class,
+        JacksonConfig.class
 })
 public class CoreCommonAutoConfiguration {
 
@@ -49,6 +51,16 @@ public class CoreCommonAutoConfiguration {
     @ConditionalOnMissingBean
     public GlobalExceptionHandler globalExceptionHandler() {
         return new GlobalExceptionHandler();
+    }
+
+    @org.springframework.context.annotation.Configuration(proxyBeanMethods = false)
+    @org.springframework.boot.autoconfigure.condition.ConditionalOnClass(name = "jakarta.servlet.ServletException")
+    public static class WebMvcExceptionHandlerConfig {
+        @Bean
+        @ConditionalOnMissingBean
+        public WebMvcGlobalExceptionHandler webMvcGlobalExceptionHandler() {
+            return new WebMvcGlobalExceptionHandler();
+        }
     }
 
     @Bean(name = "tenantAwareTaskExecutor")
